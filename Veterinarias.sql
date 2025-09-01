@@ -2,6 +2,7 @@
 CREATE DATABASE veterinarias_popayan;
 \c veterinarias_popayan;
 
+-- TABLAS
 -- Tabla de veterinarias
 CREATE TABLE veterinarias (
     id SERIAL PRIMARY KEY,
