@@ -85,6 +85,8 @@ INSERT INTO citas (id_paciente, id_veterinaria, id_procedimiento, fecha, observa
 (3, 3, 5, '2025-08-25', 'Radiografía por cojera, posible fractura.'),
 (4, 3, 8, '2025-08-28', 'Parto asistido, nacieron 6 cachorros sanos.');
 
+
+
 -- CONSULTAS
 -- consulttar las veterinarias que hay
 SELECT nombre, direccion, telefono, horario_atencion
@@ -104,30 +106,7 @@ JOIN veterinaria_procedimientos vp ON v.id = vp.id_veterinaria
 JOIN procedimientos p ON vp.id_procedimiento = p.id
 WHERE p.nombre = 'Parto asistido';
 
--- Listar pacientes y el procedimiento más reciente que tuvieron
-SELECT pa.nombre AS paciente, pa.especie, c.fecha, p.nombre AS procedimiento, v.nombre AS veterinaria
-FROM citas c
-JOIN pacientes pa ON c.id_paciente = pa.id
-JOIN procedimientos p ON c.id_procedimiento = p.id
-JOIN veterinarias v ON c.id_veterinaria = v.id
-ORDER BY c.fecha DESC;
-
--- Ver todos los pacientes que ya han tenido una cirugía
-SELECT DISTINCT pa.nombre, pa.especie, pa.raza, pr.nombre AS procedimiento
-FROM citas c
-JOIN pacientes pa ON c.id_paciente = pa.id
-JOIN procedimientos pr ON c.id_procedimiento = pr.id
-WHERE pr.nombre LIKE '%Cirugía%';
-
 -- v que atienden 24h
 SELECT nombre, direccion, telefono
 FROM veterinarias
 WHERE horario_atencion ILIKE '%24 horas%';
-
--- Ver todas las citas con observaciones
-SELECT c.fecha, pa.nombre AS paciente, pa.propietario, v.nombre AS veterinaria, p.nombre AS procedimiento, c.observaciones
-FROM citas c
-JOIN pacientes pa ON c.id_paciente = pa.id
-JOIN veterinarias v ON c.id_veterinaria = v.id
-JOIN procedimientos p ON c.id_procedimiento = p.id
-ORDER BY c.fecha;
