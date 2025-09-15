@@ -110,3 +110,74 @@ WHERE p.nombre = 'Parto asistido';
 SELECT nombre, direccion, telefono
 FROM veterinarias
 WHERE horario_atencion ILIKE '%24 horas%';
+
+
+-- TRIGGER
+-- Tabla para historial de citas
+CREATE TABLE historial_citas (
+    id SERIAL PRIMARY KEY,
+    id_cita INT,
+    accion VARCHAR(50),
+    fecha_registro TIMESTAMP DEFAULT NOW()
+);
+
+-- funcion trigger 
+CREATE OR REPLACE FUNCTION log_cita()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO historial_citas (id_cita, accion)
+    VALUES (NEW.id, 'Cita creada');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear el trigger
+CREATE TRIGGER trigger_log_cita
+AFTER INSERT ON citas
+FOR EACH ROW
+EXECUTE FUNCTION log_cita();
+
+
+-- PROCEDIMIENTOS
+-- Procedimiento para registrar una nueva cita
+CREATE OR REPLACE PROCEDURE registrar_cita(
+    p_id_paciente INT,
+    p_id_veterinaria INT,
+    p_id_procedimiento INT,
+    p_fecha DATE,
+    p_observaciones TEXT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO citas (id_paciente, id_veterinaria, id_procedimiento, fecha, observaciones)
+    VALUES (p_id_paciente, p_id_veterinaria, p_id_procedimiento, p_fecha, p_observaciones);
+
+    RAISE NOTICE 'Cita registrada correctamente para el paciente %', p_id_paciente;
+END;
+$$;
+-- Ejemplo del uso
+CALL registrar_cita(1, 2, 3, '2025-09-20', 'Corte de uñas programado.'); --se le registra citas al paciente 1 de corte de uñas
+
+
+-- Procedimiento para actualizar edad de paciente
+CREATE OR REPLACE PROCEDURE actualizar_edad_paciente(
+    p_id_paciente INT,
+    p_nueva_edad INT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE pacientes
+    SET edad = p_nueva_edad
+    WHERE id = p_id_paciente;
+
+    IF NOT FOUND THEN
+        RAISE NOTICE 'No se encontró el paciente con id %', p_id_paciente;
+    ELSE
+        RAISE NOTICE 'Edad del paciente % actualizada a % años', p_id_paciente, p_nueva_edad;
+    END IF;
+END;
+$$;
+-- Eemplo del uso
+CALL actualizar_edad_paciente(2, 4); --al paciente 2 cambia la edad a 4años
